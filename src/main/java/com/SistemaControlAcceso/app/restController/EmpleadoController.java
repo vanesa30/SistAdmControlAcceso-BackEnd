@@ -1,5 +1,7 @@
 package com.SistemaControlAcceso.app.restController;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,40 +23,41 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import com.SistemaControlAcceso.app.model.Empresa;
-import com.SistemaControlAcceso.app.service.IServicioEmpresa;
+
+import com.SistemaControlAcceso.app.model.Empleado;
+import com.SistemaControlAcceso.app.model.TipoEmpleado;
+import com.SistemaControlAcceso.app.service.IServicioEmpleado;
+
+
 
 
 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:4200/")
-public class EmpresaController {
+public class EmpleadoController {
 	
 	@Autowired
-	private IServicioEmpresa serviceEmpresa;
+	private IServicioEmpleado serviceEmpleado;
 	
-	@GetMapping("/empresa")
-	public List<Empresa> listarEmpresas(){
-		return serviceEmpresa.obtenerEmpresas();
+	@GetMapping("/empleado")
+	public List<Empleado> listarEmpleados(){
+		return serviceEmpleado.obtenerEmpleados();
 	}
 	
 	@Secured({"ROLE_ADMIN", "ROLE_USER"})
-	@GetMapping("/empresa/{id}")
+	@GetMapping("/empleado/{id}")
 	//@ResponseStatus(value = HttpStatus.NOT_FOUND)
-	public ResponseEntity<?> obtenerEmpresaPorId(@PathVariable(value = "id") int empresaId){
+	public ResponseEntity<?> obtenerEmpleadoPorId(@PathVariable(value = "id") Long empleadoId){
 		
 	
-		Empresa empresa = null;
+		Empleado empleado = null;
 		Map<String,Object> response = new HashMap<>();
 				
 		try {
 			
-			empresa = serviceEmpresa.obtenerEmpresabyID(empresaId);
-			
-	
+			empleado = serviceEmpleado.obtenerEmpleadobyID(empleadoId);				
 			
 		}	
 		catch(DataAccessException ex) {
@@ -63,20 +65,20 @@ public class EmpresaController {
 			response.put("error", ex.getMessage().concat(" :").concat(ex.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.NOT_FOUND);
 		}		
-		if (empresa == null) {
-			response.put("mensaje", "La empresa ID: " + empresaId + " No existe." );
+		if (empleado == null) {
+			response.put("mensaje", "El empleado ID: " + empleadoId + " No existe." );
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.NOT_FOUND);
 		}
 
-		return new ResponseEntity<Empresa>(empresa, HttpStatus.OK);
+		return new ResponseEntity<Empleado>(empleado, HttpStatus.OK);
 	
 	}
 	
 	@Secured({"ROLE_ADMIN", "ROLE_USER"})
-	@PostMapping("/empresa")
-	public ResponseEntity<?> guardarEmpresa(@Valid @RequestBody Empresa empresa , BindingResult result){
+	@PostMapping("/empleado")
+	public ResponseEntity<?> guardarEmpleado(@Valid @RequestBody Empleado empleado , BindingResult result){
 		
-		Empresa empresaNew = null;
+		Empleado empleadoNew = null;
 		Map<String,Object> response = new HashMap<>();
 		
 		if(result.hasErrors()) {
@@ -92,7 +94,7 @@ public class EmpresaController {
 		
 		
 		try{
-			empresaNew = serviceEmpresa.guardarEmpresa(empresa);
+			empleadoNew = serviceEmpleado.guardarEmpleado(empleado);
 			
 		}
 		catch(DataAccessException ex) {
@@ -101,20 +103,20 @@ public class EmpresaController {
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 		
-		response.put("mensaje","La empresa ha sido creada con éxito");
-		response.put("empresa",empresaNew);
+		response.put("mensaje","El empleado ha sido creada con éxito");
+		response.put("empresa",empleadoNew);
 		return new ResponseEntity<Map<String,Object>>(response,HttpStatus.CREATED);
 	}
 	
 	@Secured({"ROLE_ADMIN", "ROLE_USER"})
-	@PutMapping("/empresa/{id}")
-	public ResponseEntity<?> actualizarEmpresa(@Valid @RequestBody Empresa empresa,BindingResult result,@PathVariable(value = "id") int empresaId){
+	@PutMapping("/empleado/{id}")
+	public ResponseEntity<?> actualizarEmpleado(@Valid @RequestBody Empleado empleado,BindingResult result,@PathVariable(value = "id") Long empleadoId){
 
 		
-		Empresa empresa_act = serviceEmpresa.obtenerEmpresabyID(empresaId);
+		Empleado empleado_act = serviceEmpleado.obtenerEmpleadobyID(empleadoId);
 		
 		Map<String,Object> response = new HashMap<>();	
-		Empresa empresaActualizado = null;
+		Empleado empleadoActualizado = null;
 		
 		
 		if(result.hasErrors()) {
@@ -129,19 +131,21 @@ public class EmpresaController {
 		}
 		
 		
-		if (empresa_act == null) {
-			response.put("mensaje", "Error: no se pudo editar,la empresa ID: " + empresaId +" no existe en la base de datos!");
+		if (empleado_act == null) {
+			response.put("mensaje", "Error: no se pudo editar,el empleado ID: " + empleadoId +" no existe en la base de datos!");
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
 		
 		try {
-			 		 
-			empresa_act.setNroRuc(empresa.getNroRuc());
-			empresa_act.setRazonSocial(empresa.getRazonSocial());
-			empresa_act.setDireccPrincipal(empresa.getDireccPrincipal());
-			empresa_act.setEstadoEmpresa("1");			
+			
+			empleado_act.setNombre(empleado.getNombre());
+			empleado_act.setApellido(empleado.getApellido());
+			empleado_act.setEmail(empleado.getEmail());
+			//empleado_act.set		 
+			empleado_act.setTipo_empleado(empleado.getTipo_empleado());			
+			empleado_act.setNroIdentificacion(empleado.getNroIdentificacion());
 
-		    empresaActualizado = serviceEmpresa.guardarEmpresa(empresa_act);			 
+			empleadoActualizado = serviceEmpleado.guardarEmpleado(empleado_act);			 
 			 
 		}
 		catch(DataAccessException ex) {
@@ -150,26 +154,67 @@ public class EmpresaController {
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 		
-     	response.put("mensaje","La empresa ha sido actualizada con éxito");
-		response.put("empresa",empresaActualizado);
+     	response.put("mensaje","El empleado ha sido actualizada con éxito");
+		response.put("empleado",empleadoActualizado);
 		
 		return new ResponseEntity<Map<String,Object>>(response,HttpStatus.CREATED);
 		
 	}
 	
+	
 	@Secured({"ROLE_ADMIN", "ROLE_USER"})
-	@DeleteMapping("/empresa/{id}")
-	public ResponseEntity<?> eliminarEmpresa(@PathVariable(value = "id") int empresaId){		
+	@PutMapping("/empleado/inactivo/{id}")
+	public ResponseEntity<?> descativarEmpleado(@PathVariable(value = "id") Long empleadoId){
+
 		
-		Empresa empresa =null;
+		Empleado empleado_act = serviceEmpleado.obtenerEmpleadobyID(empleadoId);
+		
+		Map<String,Object> response = new HashMap<>();	
+		Empleado empleadoActualizado = null;
+		
+		
+
+		
+		if (empleado_act == null) {
+			response.put("mensaje", "Error: no se pudo desactivar,el empleado ID: " + empleadoId +" no existe en la base de datos!");
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+		}
+		
+		try {
+			Calendar calendar = Calendar.getInstance();
+		
+			
+			empleado_act.setEstado(false);
+			empleado_act.setFechaInactivo(calendar.getTime());
+			
+			empleadoActualizado = serviceEmpleado.guardarEmpleado(empleado_act);
+			 
+		}
+		catch(DataAccessException ex) {
+			response.put("mensaje", "Error al realizar la consulta a la base de datos" );
+			response.put("error", ex.getMessage().concat(" :").concat(ex.getMostSpecificCause().getMessage()));
+			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
+		}		
+		
+     	response.put("mensaje","Se ha desactivado al empleado " + empleado_act.getNombre()  + " con éxito");
+		//response.put("empleado",empleadoActualizado);
+		
+		return new ResponseEntity<Map<String,Object>>(response,HttpStatus.OK);
+		
+	}
+	
+	@Secured({"ROLE_ADMIN", "ROLE_USER"})
+	@DeleteMapping("/empleado/{id}")
+	public ResponseEntity<?> eliminarEmpleado(@PathVariable(value = "id") Long empleadoId){		
+		
+		Empleado empleado =null;
 		Map<String, Object> response = new HashMap<>();
 		
 		try {
-		//	empresa = serviceEmpresa.obtenerEmpresabyID(empresaId);
-			
-			serviceEmpresa.eliminarEmpresa(empresaId);
+
+			serviceEmpleado.eliminarEmpleado(empleadoId);
 		} catch (DataAccessException e) {
-			response.put("mensaje", "Error al eliminar ea la empresa de la base de datos");
+			response.put("mensaje", "Error al eliminar al empleado de la base de datos");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -180,6 +225,12 @@ public class EmpresaController {
 		
 		
 	
+	}
+	
+	
+	@GetMapping("/empleado/tipoEmpleados")
+	public List<TipoEmpleado> listarRegiones(){
+		return serviceEmpleado.findAllTipoEmpleados();
 	}
 	
 

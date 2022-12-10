@@ -16,6 +16,8 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -28,11 +30,17 @@ public class Empresa {
 	@Column(name="id_empresa")
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
 	private int id;
-	@Column(name = "nro_ruc", length = 20, nullable = false)
+	@Size(min = 11, max = 20)
+	@NotEmpty	
+	@Column(name = "nro_ruc", unique=true, length = 20, nullable = false)
 	private String nroRuc;
+	@NotEmpty
+	@Size(min = 5,max = 150)
 	@Column(name = "razon_social", length = 150, nullable = false)
 	private String razonSocial;
-	@Column(name = "direcc_principal", length = 150, nullable = true)
+	@NotEmpty
+	@Size(min = 10,max = 150)
+	@Column(name = "direcc_principal", length = 150, nullable = false)
 	private String direccPrincipal;
 	@Column(name = "estado_empresa", length = 20, nullable = false)
 	private String estadoEmpresa;	

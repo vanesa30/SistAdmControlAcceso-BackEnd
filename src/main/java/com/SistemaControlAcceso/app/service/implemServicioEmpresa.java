@@ -35,7 +35,7 @@ public class implemServicioEmpresa implements IServicioEmpresa{
 		empresa_act.setNroRuc(empresa.getNroRuc());
 		empresa_act.setRazonSocial(empresa.getRazonSocial());
 		empresa_act.setDireccPrincipal(empresa.getDireccPrincipal());
-		empresa_act.setEstadoEmpresa(empresa.getEstadoEmpresa());
+		empresa_act.setEstadoEmpresa("1");
 		
 		
 		Empresa nuevaEmpresa = empresaRepo.save(empresa_act);		
@@ -47,7 +47,7 @@ public class implemServicioEmpresa implements IServicioEmpresa{
 	public Empresa obtenerEmpresabyID(int idEmpresa) {
 		// TODO Auto-generated method stub
 		
-		Empresa empresa = empresaRepo.findById(idEmpresa).orElseThrow(null);
+		Empresa empresa = empresaRepo.findById(idEmpresa).orElse(null);
 			//	.orElseThrow(() -> new ResourceNotFoundException("Comentario", "id", idEmpresa));	
 		
 	

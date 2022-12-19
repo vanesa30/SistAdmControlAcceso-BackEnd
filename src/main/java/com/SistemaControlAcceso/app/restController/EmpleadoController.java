@@ -26,8 +26,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.SistemaControlAcceso.app.model.Empleado;
+import com.SistemaControlAcceso.app.model.Empresa;
 import com.SistemaControlAcceso.app.model.TipoEmpleado;
 import com.SistemaControlAcceso.app.service.IServicioEmpleado;
+import com.SistemaControlAcceso.app.service.IServicioEmpresa;
 
 
 
@@ -40,6 +42,9 @@ public class EmpleadoController {
 	
 	@Autowired
 	private IServicioEmpleado serviceEmpleado;
+	
+	@Autowired
+	private IServicioEmpresa serviceEmpresa;
 	
 	@GetMapping("/empleado")
 	public List<Empleado> listarEmpleados(){
@@ -94,6 +99,14 @@ public class EmpleadoController {
 		
 		
 		try{
+			
+			
+			/*Empresa empresa =serviceEmpresa.obtenerEmpresabyID(1);
+			empleado.setEmpresa(empresa);	
+			
+			TipoEmpleado tipoEmpleado =serviceEmpleado.findAllTipoEmpleados().get(0);
+			empleado.setEmpresa(empresa);	
+			empleado.setTipo_empleado(tipoEmpleado);*/
 			empleadoNew = serviceEmpleado.guardarEmpleado(empleado);
 			
 		}
@@ -144,7 +157,7 @@ public class EmpleadoController {
 			//empleado_act.set		 
 			empleado_act.setTipo_empleado(empleado.getTipo_empleado());			
 			empleado_act.setNroIdentificacion(empleado.getNroIdentificacion());
-
+            
 			empleadoActualizado = serviceEmpleado.guardarEmpleado(empleado_act);			 
 			 
 		}
